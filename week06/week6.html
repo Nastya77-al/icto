@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чотирикутник на маркерах A, B, C, D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.2.0/aframe-ar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.2.0/aframe.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Чотирикутник на маркерах A, B, C, D</h3>
+        <div id="perimeter">Периметр: розраховується...</div>
+        <div id="area">Площа трикутників: розраховується...</div>
+    </div>
+
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        <!-- Маркери -->
+        <a-marker id="markerA" type="pattern" url="../assets/pattern-letterA.patt">
+            <a-sphere position="0 0.5 0" radius="0.1" color="red"></a-sphere>
+            <a-text value="A" position="0 0.7 0" align="center" color="red" scale="0.5 0.5 0.5"></a-text>
+        </a-marker>
+        
+        <a-marker id="markerB" type="pattern" url="../assets/pattern-letterB.patt">
+            <a-sphere position="0 0.5 0" radius="0.1" color="blue"></a-sphere>
+            <a-text value="B" position="0 0.7 0" align="center" color="blue" scale="0.5 0.5 0.5"></a-text>
+        </a-marker>
+        
+        <a-marker id="markerC" type="pattern" url="../assets/pattern-letterC.patt">
+            <a-sphere position="0 0.5 0" radius="0.1" color="green"></a-sphere>
+            <a-text value="C" position="0 0.7 0" align="center" color="green" scale="0.5 0.5 0.5"></a-text>
+        </a-marker>
+        
+        <a-marker id="markerD" type="pattern" url="../assets/pattern-letterD.patt">
+            <a-sphere position="0 0.5 0" radius="0.1" color="yellow"></a-sphere>
+            <a-text value="D" position="0 0.7 0" align="center" color="yellow" scale="0.5 0.5 0.5"></a-text>
+        </a-marker>
+        
+        <!-- Камера -->
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+        // Координати маркерів
+        let positions = {
+            A: new THREE.Vector3(),
+            B: new THREE.Vector3(),
+            C: new THREE.Vector3(),
+            D: new THREE.Vector3()
+        };
+        
+        // Статуси видимості маркерів
+        let visible = {
+            A: false,
+            B: false,
+            C: false,
+            D: false
+        };
+        
+        // Лінії між маркерами
+        let lines = {};
+        
+        // Сцена для додавання ліній
+        let sceneEl = document.querySelector('a-scene').object3D;
+        
+        // Матеріали для ліній
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+        
+        // Слухачі для маркерів
+        document.querySelector('#markerA').addEventListener('markerFound', function() {
+            visible.A = true;
+            updatePosition('A', this.object3D.position);
+        });
+        
+        document.querySelector('#markerA').addEventListener('markerLost', function() {
+            visible.A = false;
+            updateVisibility();
+        });
+        
+        document.querySelector('#markerB').addEventListener('markerFound', function() {
+            visible.B = true;
+            updatePosition('B', this.object3D.position);
+        });
+        
+        document.querySelector('#markerB').addEventListener('markerLost', function() {
+            visible.B = false;
+            updateVisibility();
+        });
+        
+        document.querySelector('#markerC').addEventListener('markerFound', function() {
+            visible.C = true;
+            updatePosition('C', this.object3D.position);
+        });
+        
+        document.querySelector('#markerC').addEventListener('markerLost', function() {
+            visible.C = false;
+            updateVisibility();
+        });
+        
+        document.querySelector('#markerD').addEventListener('markerFound', function() {
+            visible.D = true;
+            updatePosition('D', this.object3D.position);
+        });
+        
+        document.querySelector('#markerD').addEventListener('markerLost', function() {
+            visible.D = false;
+            updateVisibility();
+        });
+        
+        // Оновлення позиції маркера
+        function updatePosition(marker, position) {
+            positions[marker].copy(position);
+            updateQuadrilateral();
+        }
+        
+        // Оновлення видимості ліній
+        function updateVisibility() {
+            // Видалення всіх ліній
+            Object.values(lines).forEach(line => {
+                if (line && sceneEl.children.includes(line)) {
+                    sceneEl.remove(line);
+                }
+            });
+            
+            lines = {};
+            
+            // Якщо видно хоча б 4 маркери, малюємо чотирикутник заново
+            if (visible.A && visible.B && visible.C && visible.D) {
+                updateQuadrilateral();
+            } else {
+                document.getElementById('perimeter').innerHTML = "Периметр: розраховується...";
+                document.getElementById('area').innerHTML = "Площа трикутників: розраховується...";
+            }
+        }
+        
+        // Розрахунок відстані між двома точками
+        function distance(p1, p2) {
+            return Math.sqrt(
+                Math.pow(p2.x - p1.x, 2) + 
+                Math.pow(p2.y - p1.y, 2) + 
+                Math.pow(p2.z - p1.z, 2)
+            );
+        }
+        
+        // Розрахунок площі трикутника за формулою Герона
+        function triangleArea(p1, p2, p3) {
+            const a = distance(p1, p2);
+            const b = distance(p2, p3);
+            const c = distance(p3, p1);
+            const s = (a + b + c) / 2;
+            return Math.sqrt(s * (s - a) * (s - b) * (s - c));
+        }
+        
+        // Оновлення чотирикутника
+        function updateQuadrilateral() {
+            if (visible.A && visible.B && visible.C && visible.D) {
+                // Створюємо лінії між маркерами
+                createLine('AB', positions.A, positions.B);
+                createLine('BC', positions.B, positions.C);
+                createLine('CD', positions.C, positions.D);
+                createLine('DA', positions.D, positions.A);
+                
+                // Розрахунок периметра
+                const perimeter = 
+                    distance(positions.A, positions.B) +
+                    distance(positions.B, positions.C) +
+                    distance(positions.C, positions.D) +
+                    distance(positions.D, positions.A);
+                
+                // Розрахунок площі (сума площ двох трикутників)
+                const area1 = triangleArea(positions.A, positions.B, positions.C);
+                const area2 = triangleArea(positions.A, positions.C, positions.D);
+                const totalArea = area1 + area2;
+                
+                // Оновлення інформації
+                document.getElementById('perimeter').innerHTML = `Периметр: ${perimeter.toFixed(2)} одиниць`;
+                document.getElementById('area').innerHTML = `Площа трикутників: ${totalArea.toFixed(2)} кв. одиниць`;
+            }
+        }
+        
+        // Створення лінії між двома точками
+        function createLine(name, start, end) {
+            // Видалити стару лінію, якщо вона існує
+            if (lines[name] && sceneEl.children.includes(lines[name])) {
+                sceneEl.remove(lines[name]);
+            }
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(start.x, start.y, start.z),
+                new THREE.Vector3(end.x, end.y, end.z)
+            ]);
+            
+            const line = new THREE.Line(geometry, lineMaterial);
+            lines[name] = line;
+            sceneEl.add(line);
+        }
+    </script>
+</body>
+</html>
