@@ -5,27 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AR Quadrilateral Calculator</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
 <body>
-  <a-scene embedded arjs="trackingMethod: best; sourceType: webcam;">
-    <!-- Маркер A (Hiro) -->
-    <a-marker type="pattern" url="..assets/pattern-letterA.patt">
+  <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; cameraParam: https://raw.githack.com/AR-js-org/AR.js/master/data/data/camera_para.dat;">
+    <!-- Маркер A -->
+    <a-marker type="pattern" url="../assets/patter-letternA.patt">
       <a-box position="0 0.5 0" material="color: red;"></a-box>
     </a-marker>
 
-    <!-- Маркер B (Kanji) -->
-    <a-marker type="pattern" url="..assets/pattern-letterB.patt">
+    <!-- Маркер B -->
+    <a-marker type="pattern" url="../assets/patter-letternB.patt">
       <a-box position="0 0.5 0" material="color: blue;"></a-box>
     </a-marker>
 
-    <!-- Маркер C (кастомний) -->
-    <a-marker type="pattern" url="patterns/pattern-letterC.patt">
+    <!-- Маркер C -->
+    <a-marker type="pattern" url="../assets/patter-letternC.patt">
       <a-box position="0 0.5 0" material="color: green;"></a-box>
     </a-marker>
 
-    <!-- Маркер D (кастомний) -->
-    <a-marker type="pattern" url="patterns/pattern-letterD.patt">
+    <!-- Маркер D -->
+    <a-marker type="pattern" url="../assets/patter-letternD.patt">
       <a-box position="0 0.5 0" material="color: yellow;"></a-box>
     </a-marker>
 
@@ -38,10 +38,10 @@
 
   <script>
     // Отримання посилань на маркери
-    const markerA = document.querySelector('a-marker[type="pattern"][url="..assets/pattern-letterA.patt"]');
-    const markerB = document.querySelector('a-marker[type="pattern"][url="..assets/pattern-letterB.patt"]');
-    const markerC = document.querySelector('a-marker[type="pattern"][url="..assets/pattern-letterC.patt"]');
-    const markerD = document.querySelector('a-marker[type="pattern"][url="..assets/pattern-letterD.patt"]');
+    const markerA = document.querySelector('a-marker[type="pattern"][url="../assets/patter-letternA.patt"]');
+    const markerB = document.querySelector('a-marker[type="pattern"][url="../assets/patter-letternB.patt"]');
+    const markerC = document.querySelector('a-marker[type="pattern"][url="../assets/patter-letternC.patt"]');
+    const markerD = document.querySelector('a-marker[type="pattern"][url="../assets/patter-letternD.patt"]');
 
     // Функція для отримання позицій маркерів
     function getMarkerPositions() {
