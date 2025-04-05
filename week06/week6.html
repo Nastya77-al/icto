@@ -30,7 +30,7 @@
     </a-marker>
 
     <!-- Текст для відображення результатів -->
-    <a-entity id="result" text="value: Очікування маркерів...; align: center; color: white; font: https://cdn.aframe.io/fonts/Roboto-msdf.json; width: 2; wrapCount: 30; lineHeight: 0.1;" position="0 0.2 -0.3" camera-follow></a-entity>
+    <a-entity id="result" text="value: Waiting for markers...; align: center; color: white; font: mozillavr; width: 1.5; wrapCount: 20; lineHeight: 50;" position="0 0.2 -0.3" camera-follow></a-entity>
 
     <!-- Камера -->
     <a-entity camera></a-entity>
@@ -128,11 +128,11 @@
           const perimeter = calculatePerimeter(posA, posB, posC, posD);
           const area = calculateArea(posA, posB, posC, posD);
           const triangles = 4;
-          const resultText = `Периметр: ${perimeter.toFixed(2)} м\nПлоща: ${area.toFixed(2)} м²\nТрикутників: ${triangles}`;
+          const resultText = `Perimeter: ${perimeter.toFixed(2)} m\nArea: ${area.toFixed(2)} m²\nTriangles: ${triangles}`;
           console.log('Updating text:', resultText);
           document.querySelector('#result').setAttribute('text', 'value', resultText);
         } else {
-          document.querySelector('#result').setAttribute('text', 'value', 'Очікування маркерів...');
+          document.querySelector('#result').setAttribute('text', 'value', 'Waiting for markers...');
         }
       }
     });
@@ -147,6 +147,7 @@
           y: position.y + 0.2,
           z: position.z - 0.3
         });
+        console.log('Text position:', this.el.getAttribute('position')); // Діагностика позиції тексту
       }
     });
 
