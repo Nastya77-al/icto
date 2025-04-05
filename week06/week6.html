@@ -10,22 +10,22 @@
 <body>
   <a-scene embedded arjs="trackingMethod: best; sourceType: webcam;">
     <!-- Маркер A (Hiro) -->
-    <a-marker preset="hiro">
+    <a-marker type="pattern" url="..assets/pattern-letterA.patt">
       <a-box position="0 0.5 0" material="color: red;"></a-box>
     </a-marker>
 
     <!-- Маркер B (Kanji) -->
-    <a-marker preset="kanji">
+    <a-marker type="pattern" url="..assets/pattern-letterB.patt">
       <a-box position="0 0.5 0" material="color: blue;"></a-box>
     </a-marker>
 
     <!-- Маркер C (кастомний) -->
-    <a-marker type="pattern" url="patterns/pattern-c.patt">
+    <a-marker type="pattern" url="patterns/pattern-letterC.patt">
       <a-box position="0 0.5 0" material="color: green;"></a-box>
     </a-marker>
 
     <!-- Маркер D (кастомний) -->
-    <a-marker type="pattern" url="patterns/pattern-d.patt">
+    <a-marker type="pattern" url="patterns/pattern-letterD.patt">
       <a-box position="0 0.5 0" material="color: yellow;"></a-box>
     </a-marker>
 
@@ -38,10 +38,10 @@
 
   <script>
     // Отримання посилань на маркери
-    const markerA = document.querySelector('a-marker[preset="hiro"]');
-    const markerB = document.querySelector('a-marker[preset="kanji"]');
-    const markerC = document.querySelector('a-marker[type="pattern"][url="patterns/pattern-c.patt"]');
-    const markerD = document.querySelector('a-marker[type="pattern"][url="patterns/pattern-d.patt"]');
+    const markerA = document.querySelector('a-marker[type="pattern"][url="..assets/pattern-letterA.patt"]');
+    const markerB = document.querySelector('a-marker[type="pattern"][url="..assets/pattern-letterB.patt"]');
+    const markerC = document.querySelector('a-marker[type="pattern"][url="..assets/pattern-letterC.patt"]');
+    const markerD = document.querySelector('a-marker[type="pattern"][url="..assets/pattern-letterD.patt"]');
 
     // Функція для отримання позицій маркерів
     function getMarkerPositions() {
