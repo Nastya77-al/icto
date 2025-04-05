@@ -30,7 +30,7 @@
     </a-marker>
 
     <!-- Текст для відображення результатів -->
-    <a-entity id="result" text="value: Очікування маркерів...; align: center; color: white; font: https://cdn.aframe.io/fonts/Roboto-msdf.json;" position="0 0.5 -0.5"></a-entity>
+    <a-entity id="result" text="value: Очікування маркерів...; align: center; color: white; font: mozillavr; width: 2;" position="0 0.2 -0.3" camera-follow></a-entity>
 
     <!-- Камера -->
     <a-entity camera></a-entity>
@@ -135,6 +135,19 @@
           console.log('Not all markers are visible');
           document.querySelector('#result').setAttribute('text', 'value', 'Очікування маркерів...');
         }
+      }
+    });
+
+    // Компонент для слідкування за камерою
+    AFRAME.registerComponent('camera-follow', {
+      tick: function () {
+        const camera = document.querySelector('a-entity[camera]');
+        const position = camera.getAttribute('position');
+        this.el.setAttribute('position', {
+          x: position.x,
+          y: position.y + 0.2,
+          z: position.z - 0.3
+        });
       }
     });
 
