@@ -38,7 +38,7 @@
 
   <script>
     // Отримання посилань на маркери
-    const markerA = document.querySelector('a-marker[type="pattern"][url="../assets/pattern-letterA.patt"]');
+    const markerA = document.querySelector('a-marker[type="pattern"][url="../assets/pattern-letter.patt"]');
     const markerB = document.querySelector('a-marker[type="pattern"][url="../assets/pattern-letterB.patt"]');
     const markerC = document.querySelector('a-marker[type="pattern"][url="../assets/pattern-letterC.patt"]');
     const markerD = document.querySelector('a-marker[type="pattern"][url="../assets/pattern-letterD.patt"]');
@@ -132,7 +132,6 @@
           console.log('Updating text:', resultText);
           document.querySelector('#result').setAttribute('text', 'value', resultText);
         } else {
-          console.log('Not all markers are visible');
           document.querySelector('#result').setAttribute('text', 'value', 'Очікування маркерів...');
         }
       }
