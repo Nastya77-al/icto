@@ -30,7 +30,7 @@
     </a-marker>
 
     <!-- Текст для відображення результатів -->
-    <a-entity id="result" text="value: Waiting for markers...; align: left; color: white; font: mozillavr; width: 4; wrapCount: 20; lineHeight: 50;" scale="0.2 0.2 0.2" position="0 0.2 -0.3" camera-follow></a-entity>
+    <a-entity id="result" text="value: Waiting for markers...; align: left; color: white; font: mozillavr; width: 2; wrapCount: 15; lineHeight: 30;" scale="0.5 0.5 0.5" position="0 0.2 -0.3" camera-follow></a-entity>
 
     <!-- Камера -->
     <a-entity camera></a-entity>
@@ -143,8 +143,8 @@
         const camera = document.querySelector('a-entity[camera]');
         const position = camera.getAttribute('position');
         this.el.setAttribute('position', {
-          x: position.x - 0.4, // Зміщуємо вліво
-          y: position.y - 0.3, // Зміщуємо вниз
+          x: position.x - 0.2, // Зміщуємо вліво (менше зміщення)
+          y: position.y - 0.1, // Зміщуємо вниз (менше зміщення)
           z: position.z - 0.3  // Залишаємо перед камерою
         });
         console.log('Text position:', this.el.getAttribute('position')); // Діагностика позиції тексту
