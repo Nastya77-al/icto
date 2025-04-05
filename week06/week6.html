@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AR Quadrilateral Calculator</title>
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
 </head>
 <body>
-  <a-scene embedded arjs='trackingMethod: best;'>
+  <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; cameraParam: https://raw.githack.com/AR-js-org/AR.js/master/data/data/camera_para.dat; markersAreaEnabled: false;">
     <!-- Маркер A -->
     <a-marker type="pattern" url="../assets/pattern-letterA.patt">
       <a-box position="0 0.5 0" material="color: red;"></a-box>
@@ -30,7 +30,7 @@
     </a-marker>
 
     <!-- Текст для відображення результатів -->
-    <a-entity id="result" text="value: Очікування маркерів...; align: center; color: white;" position="0 1.5 -3"></a-entity>
+    <a-entity id="result" text="value: Очікування маркерів...; align: center; color: white; font: https://cdn.aframe.io/fonts/Roboto-msdf.json;" position="0 0.5 -0.5"></a-entity>
 
     <!-- Камера -->
     <a-entity camera></a-entity>
@@ -43,12 +43,16 @@
     const markerC = document.querySelector('a-marker[type="pattern"][url="../assets/pattern-letterC.patt"]');
     const markerD = document.querySelector('a-marker[type="pattern"][url="../assets/pattern-letterD.patt"]');
 
+    // Діагностика: перевірка, чи маркери знайдені
+    console.log('Markers:', { markerA, markerB, markerC, markerD });
+
     // Функція для отримання позицій маркерів
     function getMarkerPositions() {
-      const posA = markerA.object3D.visible ? markerA.object3D.position : null;
-      const posB = markerB.object3D.visible ? markerB.object3D.position : null;
-      const posC = markerC.object3D.visible ? markerC.object3D.position : null;
-      const posD = markerD.object3D.visible ? markerD.object3D.position : null;
+      const posA = markerA && markerA.object3D.visible ? markerA.object3D.position : null;
+      const posB = markerB && markerB.object3D.visible ? markerB.object3D.position : null;
+      const posC = markerC && markerC.object3D.visible ? markerC.object3D.position : null;
+      const posD = markerD && markerD.object3D.visible ? markerD.object3D.position : null;
+      console.log('Positions:', { posA, posB, posC, posD });
       return { posA, posB, posC, posD };
     }
 
@@ -123,10 +127,12 @@
         if (posA && posB && posC && posD) {
           const perimeter = calculatePerimeter(posA, posB, posC, posD);
           const area = calculateArea(posA, posB, posC, posD);
-          const triangles = 4; // Кількість трикутників фіксована для чотирикутника з 4 точками
+          const triangles = 4;
           const resultText = `Периметр: ${perimeter.toFixed(2)} м\nПлоща: ${area.toFixed(2)} м²\nТрикутників: ${triangles}`;
+          console.log('Updating text:', resultText);
           document.querySelector('#result').setAttribute('text', 'value', resultText);
         } else {
+          console.log('Not all markers are visible');
           document.querySelector('#result').setAttribute('text', 'value', 'Очікування маркерів...');
         }
       }
@@ -135,6 +141,11 @@
     // Додавання компонентів до сцени
     scene.setAttribute('update-lines', '');
     scene.setAttribute('update-results', '');
+
+    // Діагностика: перевірка ініціалізації камери
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(() => console.log('Camera access granted'))
+      .catch(err => console.error('Camera access denied:', err));
   </script>
 </body>
 </html>
