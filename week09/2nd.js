@@ -30,7 +30,7 @@ const progress = document.getElementById("progress");
 const loader = new GLTFLoader();
 
 loader.load(
-    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Duck/glTF/Duck.gltf', // Новий URL
+    'https://raw.githubusercontent.com/mrdoob/three.js/r141/examples/models/gltf/Duck/glTF/Duck.gltf', // Коректний URL для гілки r141
     function (gltf) {
         console.log(gltf); // Перевіряємо, чи модель завантажилася
         scene.add(gltf.scene);
