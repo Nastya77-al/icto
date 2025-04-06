@@ -6,6 +6,22 @@
   <title>AR Quadrilateral Calculator</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
+  <style>
+    /* Стилі для текстового блоку */
+    #result {
+      position: fixed;
+      bottom: 10px; /* Відступ від нижнього краю */
+      left: 10px; /* Відступ від лівого краю */
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 14px; /* Розмір шрифту 14 пікселів */
+      line-height: 1.5; /* Висота рядка */
+      background: rgba(0, 0, 0, 0.5); /* Напівпрозорий фон для кращої видимості */
+      padding: 5px 10px; /* Внутрішні відступи */
+      border-radius: 5px; /* Закруглені кути */
+      z-index: 10; /* Щоб текст був поверх сцени */
+    }
+  </style>
 </head>
 <body>
   <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; cameraParam: https://raw.githack.com/AR-js-org/AR.js/master/data/data/camera_para.dat; markersAreaEnabled: false;">
@@ -29,12 +45,12 @@
       <a-box position="0 0.5 0" material="color: yellow;"></a-box>
     </a-marker>
 
-    <!-- Текст для відображення результатів -->
-    <a-entity id="result" text="value: Waiting for markers...; align: left; color: white; font: mozillavr; width: 2; wrapCount: 15; lineHeight: 30;" scale="0.5 0.5 0.5" position="0 0.2 -0.3" camera-follow></a-entity>
-
     <!-- Камера -->
     <a-entity camera></a-entity>
   </a-scene>
+
+  <!-- Текстовий блок для відображення результатів -->
+  <div id="result">Waiting for markers...</div>
 
   <script>
     // Отримання посилань на маркери
@@ -128,26 +144,12 @@
           const perimeter = calculatePerimeter(posA, posB, posC, posD);
           const area = calculateArea(posA, posB, posC, posD);
           const triangles = 4;
-          const resultText = `Perimeter: ${perimeter.toFixed(2)} m\nArea: ${area.toFixed(2)} m²\nTriangles: ${triangles}`;
+          const resultText = `Периметр: ${perimeter.toFixed(2)} м\nПлоща: ${area.toFixed(2)} м²\nТрикутників: ${triangles}`;
           console.log('Updating text:', resultText);
-          document.querySelector('#result').setAttribute('text', 'value', resultText);
+          document.querySelector('#result').innerText = resultText; // Оновлюємо текст у <div>
         } else {
-          document.querySelector('#result').setAttribute('text', 'value', 'Waiting for markers...');
+          document.querySelector('#result').innerText = 'Очікування маркерів...';
         }
-      }
-    });
-
-    // Компонент для слідкування за камерою
-    AFRAME.registerComponent('camera-follow', {
-      tick: function () {
-        const camera = document.querySelector('a-entity[camera]');
-        const position = camera.getAttribute('position');
-        this.el.setAttribute('position', {
-          x: position.x - 0.2, // Зміщуємо вліво (менше зміщення)
-          y: position.y - 0.1, // Зміщуємо вниз (менше зміщення)
-          z: position.z - 0.3  // Залишаємо перед камерою
-        });
-        console.log('Text position:', this.el.getAttribute('position')); // Діагностика позиції тексту
       }
     });
 
