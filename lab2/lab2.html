@@ -5,80 +5,104 @@
   <title>Saturn AR Scene with Three.js and MindAR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.min.js" onload="console.log('Three.js завантажено')" onerror="console.error('Помилка завантаження Three.js')"></script>
   <!-- MindAR -->
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js" onload="console.log('MindAR завантажено')" onerror="console.error('Помилка завантаження MindAR')"></script>
 </head>
 <body>
   <div id="ar-container"></div>
   <script type="module">
-    // Ініціалізація сцени
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.getElementById('ar-container').appendChild(renderer.domElement);
-
-    // MindAR ініціалізація
-    const mindarThree = new window.MINDAR.IMAGE.MindARThree({
-      container: document.getElementById('ar-container'),
-      imageTargetSrc: '../assets/targets.mind'
-    });
-    const { root, viewport } = mindarThree.addCSSAnchor(0);
-    scene.add(root);
-
-    // Завантаження текстур
-    const textureLoader = new THREE.TextureLoader();
-    const saturnTexture = textureLoader.load('../week05/2k_saturn.jpg');
-    const ringTexture = textureLoader.load('../week05/2k_saturn_ring_alpha.png');
-
-    // Сатурн
-    const saturnGeometry = new THREE.SphereGeometry(0.6, 32, 32);
-    const saturnMaterial = new THREE.MeshStandardMaterial({ map: saturnTexture });
-    const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
-    root.add(saturn);
-
-    // Кільця
-    const ringGeometry = new THREE.RingGeometry(0.745, 1.37, 64);
-    const ringMaterial = new THREE.MeshStandardMaterial({
-      map: ringTexture,
-      side: THREE.DoubleSide,
-      transparent: true
-    });
-    const rings = new THREE.Mesh(ringGeometry, ringMaterial);
-    rings.rotation.x = Math.PI / 2; // Розташувати кільця в екваторіальній площині
-    root.add(rings);
-
-    // Нахил осі Сатурна (27°)
-    const group = new THREE.Group();
-    group.add(saturn);
-    group.add(rings);
-    group.rotation.x = THREE.MathUtils.degToRad(27);
-    root.add(group);
-
-    // Джерело світла
-    const pointLight = new THREE.PointLight(0xffffff, 1.5, 10);
-    pointLight.position.set(5, 0, 0);
-    scene.add(pointLight);
-
-    // Анімація
-    const animate = () => {
-      requestAnimationFrame(animate);
-      // Обертання Сатурна та кілець (360° за 10 секунд)
-      group.rotation.y += (2 * Math.PI) / (10 * 60); // 360° / (10 секунд * 60 кадрів/сек)
-      renderer.render(scene, camera);
+    // Функція для очікування завантаження скриптів
+    const waitForScripts = () => {
+      return new Promise((resolve, reject) => {
+        const checkScripts = () => {
+          if (typeof THREE !== 'undefined' && window.MINDAR) {
+            console.log('Усі скрипти завантажено');
+            resolve();
+          } else {
+            console.log('Очікування завантаження скриптів...');
+            setTimeout(checkScripts, 100);
+          }
+        };
+        checkScripts();
+      });
     };
 
-    // Запуск MindAR
-    mindarThree.start().then(() => {
-      animate();
-    });
-
-    // Обробка зміни розміру вікна
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
+    // Виконання основного коду після завантаження скриптів
+    waitForScripts().then(() => {
+      // Ініціалізація сцени
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
+      document.getElementById('ar-container').appendChild(renderer.domElement);
+
+      // MindAR ініціалізація
+      const mindarThree = new window.MINDAR.IMAGE.MindARThree({
+        container: document.getElementById('ar-container'),
+        imageTargetSrc: '../assets/targets.mind'
+      });
+      const { root, viewport } = mindarThree.addCSSAnchor(0);
+      scene.add(root);
+
+      // Завантаження текстур
+      const textureLoader = new THREE.TextureLoader();
+      const saturnTexture = textureLoader.load('../week05/2k_saturn.jpg');
+      const ringTexture = textureLoader.load('../week05/2k_saturn_ring_alpha.png');
+
+      // Сатурн
+      const saturnGeometry = new THREE.SphereGeometry(0.6, 32, 32);
+      const saturnMaterial = new THREE.MeshStandardMaterial({ map: saturnTexture });
+      const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
+      root.add(saturn);
+
+      // Кільця
+      const ringGeometry = new THREE.RingGeometry(0.745, 1.37, 64);
+      const ringMaterial = new THREE.MeshStandardMaterial({
+        map: ringTexture,
+        side: THREE.DoubleSide,
+        transparent: true
+      });
+      const rings = new THREE.Mesh(ringGeometry, ringMaterial);
+      rings.rotation.x = Math.PI / 2; // Розташувати кільця в екваторіальній площині
+      root.add(rings);
+
+      // Нахил осі Сатурна (27°)
+      const group = new THREE.Group();
+      group.add(saturn);
+      group.add(rings);
+      group.rotation.x = THREE.MathUtils.degToRad(27);
+      root.add(group);
+
+      // Джерело світла
+      const pointLight = new THREE.PointLight(0xffffff, 1.5, 10);
+      pointLight.position.set(5, 0, 0);
+      scene.add(pointLight);
+
+      // Анімація
+      const animate = () => {
+        requestAnimationFrame(animate);
+        // Обертання Сатурна та кілець (360° за 10 секунд)
+        group.rotation.y += (2 * Math.PI) / (10 * 60); // 360° / (10 секунд * 60 кадрів/сек)
+        renderer.render(scene, camera);
+      };
+
+      // Запуск MindAR
+      mindarThree.start().then(() => {
+        console.log('MindAR успішно запущений');
+        animate();
+      }).catch(err => {
+        console.error('Помилка запуску MindAR:', err);
+      });
+
+      // Обробка зміни розміру вікна
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }).catch(err => {
+      console.error('Не вдалося завантажити скрипти:', err);
     });
   </script>
 </body>
