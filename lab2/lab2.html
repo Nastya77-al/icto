@@ -1,10 +1,9 @@
 <!DOCTYPE html>
- <html>
+<html>
 <head>
   <meta charset="UTF-8">
   <title>Saturn AR Scene with Three.js and MindAR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Визначення імпортів через importmap -->
   <script type="importmap">
     {
       "imports": {
@@ -18,17 +17,8 @@
 <body>
   <div id="ar-container"></div>
   <script type="module">
-    // Імпорт Three.js
     import * as THREE from 'three';
-    // Імпорт MindAR
     import 'mind-ar';
-
-    // Ініціалізація сцени
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.getElementById('ar-container').appendChild(renderer.domElement);
 
     // Перевірка наявності MINDAR
     if (!window.MINDAR) {
@@ -36,50 +26,31 @@
       throw new Error('MINDAR is not loaded');
     }
 
-    // MindAR ініціалізація
+    // Ініціалізація MindAR
     const mindarThree = new window.MINDAR.IMAGE.MindARThree({
       container: document.getElementById('ar-container'),
       imageTargetSrc: '../assets/targets.mind'
     });
 
-    // Перевірка ініціалізації MindAR
-    if (!mindarThree) {
-      console.error('MindAR не ініціалізовано');
-      throw new Error('MindAR initialization failed');
-    }
-
-    // Отримання root об’єкта
-    let root;
-    try {
-      const anchor = mindarThree.addCSSAnchor(0);
-      console.log('Anchor:', anchor);
-      root = anchor.root;
-      console.log('Root об’єкт:', root);
-      console.log('Viewport:', anchor.viewport);
-    } catch (err) {
-      console.error('Помилка при виклику addCSSAnchor:', err);
-      throw err;
-    }
-
-    // Перевірка, чи root є екземпляром THREE.Object3D
-    if (!(root instanceof THREE.Object3D)) {
-      console.warn('Root не є екземпляром THREE.Object3D, створюємо власний об’єкт');
-      root = new THREE.Object3D();
-    }
-
-    // Додавання root до сцени
-    scene.add(root);
+    // Отримання renderer, scene та camera від MindAR
+    const { renderer, scene, camera } = mindarThree;
 
     // Завантаження текстур
     const textureLoader = new THREE.TextureLoader();
     const saturnTexture = textureLoader.load('../week05/2k_saturn.jpg');
     const ringTexture = textureLoader.load('../week05/2k_saturn_ring_alpha.png');
 
+    // Додавання якоря
+    const anchor = mindarThree.addAnchor(0);
+
+    // Створення групи для Сатурна та його кілець
+    const group = new THREE.Group();
+
     // Сатурн
     const saturnGeometry = new THREE.SphereGeometry(0.6, 32, 32);
     const saturnMaterial = new THREE.MeshStandardMaterial({ map: saturnTexture });
     const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
-    root.add(saturn);
+    group.add(saturn);
 
     // Кільця
     const ringGeometry = new THREE.RingGeometry(0.745, 1.37, 64);
@@ -89,15 +60,14 @@
       transparent: true
     });
     const rings = new THREE.Mesh(ringGeometry, ringMaterial);
-    rings.rotation.x = Math.PI / 2; // Розташувати кільця в екваторіальній площині
-    root.add(rings);
+    rings.rotation.x = Math.PI / 2;
+    group.add(rings);
 
     // Нахил осі Сатурна (27°)
-    const group = new THREE.Group();
-    group.add(saturn);
-    group.add(rings);
     group.rotation.x = THREE.MathUtils.degToRad(27);
-    root.add(group);
+
+    // Додавання групи до якоря
+    anchor.group.add(group);
 
     // Джерело світла
     const pointLight = new THREE.PointLight(0xffffff, 1.5, 10);
@@ -107,8 +77,7 @@
     // Анімація
     const animate = () => {
       requestAnimationFrame(animate);
-      // Обертання Сатурна та кілець (360° за 10 секунд)
-      group.rotation.y += (2 * Math.PI) / (10 * 60); // 360° / (10 секунд * 60 кадрів/сек)
+      group.rotation.y += (2 * Math.PI) / (10 * 60);
       renderer.render(scene, camera);
     };
 
@@ -118,13 +87,6 @@
       animate();
     }).catch(err => {
       console.error('Помилка запуску MindAR:', err);
-    });
-
-    // Обробка зміни розміру вікна
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
     });
   </script>
 </body>
