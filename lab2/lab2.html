@@ -44,20 +44,6 @@
     // Отримання renderer, scene та camera від MindAR
     const { renderer, scene, camera } = mindarThree;
 
-    // Додаємо обробники подій для дебаґінгу
-    mindarThree.on('targetFound', () => {
-      console.log('Маркер знайдено!');
-    });
-    mindarThree.on('targetLost', () => {
-      console.log('Маркер втрачено!');
-    });
-
-    // Завантаження текстур
-    // Переконайтеся, що файли текстур доступні за вказаними шляхами
-    const textureLoader = new THREE.TextureLoader();
-    const saturnTexture = textureLoader.load('../week05/2k_saturn.jpg');
-    const ringTexture = textureLoader.load('../week05/2k_saturn_ring_alpha.png');
-
     // Додавання якоря
     const anchor = mindarThree.addAnchor(0);
 
@@ -66,14 +52,16 @@
 
     // Сатурн
     const saturnGeometry = new THREE.SphereGeometry(0.6, 32, 32);
-    const saturnMaterial = new THREE.MeshStandardMaterial({ map: saturnTexture });
+    const saturnMaterial = new THREE.MeshStandardMaterial({
+      map: new THREE.TextureLoader().load('../week05/2k_saturn.jpg')
+    });
     const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
     group.add(saturn);
 
     // Кільця
     const ringGeometry = new THREE.RingGeometry(0.745, 1.37, 64);
     const ringMaterial = new THREE.MeshStandardMaterial({
-      map: ringTexture,
+      map: new THREE.TextureLoader().load('../week05/2k_saturn_ring_alpha.png'),
       side: THREE.DoubleSide,
       transparent: true
     });
@@ -92,9 +80,22 @@
     pointLight.position.set(5, 0, 0);
     scene.add(pointLight);
 
+    // Змінна для відстеження стану якоря
+    let isTargetVisible = false;
+
     // Анімація
     const animate = () => {
       requestAnimationFrame(animate);
+
+      // Перевірка стану якоря для дебаґінгу
+      if (anchor.group.visible && !isTargetVisible) {
+        console.log('Маркер знайдено!');
+        isTargetVisible = true;
+      } else if (!anchor.group.visible && isTargetVisible) {
+        console.log('Маркер втрачено!');
+        isTargetVisible = false;
+      }
+
       group.rotation.y += (2 * Math.PI) / (10 * 60);
       renderer.render(scene, camera);
     };
