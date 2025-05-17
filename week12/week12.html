@@ -19,23 +19,23 @@
     location-based
     renderer="antialias: true; alpha: true; logarithmicDepthBuffer: true;">
     
-    <!-- Модель 1: ліворуч від користувача (5 метрів ліворуч) -->
-    <a-entity
-      gltf-model="https://raw.githubusercontent.com/AR-js-org/AR.js/master/aframe/examples/test-models/cube/scene.gltf"
+    <!-- Модель 1: куб ліворуч від користувача (5 метрів ліворуч) -->
+    <a-box
       gps-entity-place="latitude: 0; longitude: 0"
       position="-5 0 0"
       scale="0.5 0.5 0.5"
-      rotation="0 45 0">
-    </a-entity>
+      rotation="0 45 0"
+      color="blue">
+    </a-box>
     
-    <!-- Модель 2: праворуч від користувача (5 метрів праворуч) -->
-    <a-entity
-      gltf-model="https://raw.githubusercontent.com/AR-js-org/AR.js/master/aframe/examples/test-models/sphere/scene.gltf"
+    <!-- Модель 2: сфера праворуч від користувача (5 метрів праворуч) -->
+    <a-sphere
       gps-entity-place="latitude: 0; longitude: 0"
       position="5 0 0"
       scale="0.5 0.5 0.5"
-      rotation="0 -45 0">
-    </a-entity>
+      rotation="0 -45 0"
+      color="red">
+    </a-sphere>
 
     <!-- Камера з підтримкою геолокації -->
     <a-camera gps-camera rotation-reader></a-camera>
