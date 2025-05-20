@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Saturn AR Scene with WebXR and Three.js</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #ar-container { width: 100vw; height: 100vh; position: relative; }
+    #ar-button { position: absolute; bottom: 20px; right: 20px; padding: 10px 20px; background-color: #0078d7; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="ar-container"></div>
+  <script type="module">
+    import * as THREE from 'three';
+    import { ARButton } from './js/ARButton.js'; // Локальний імпорт
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.xr.enabled = true;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.getElementById('ar-container').appendChild(renderer.domElement);
+
+    const arButton = ARButton.createButton(renderer, {
+      requiredFeatures: ['hit-test'],
+      optionalFeatures: ['dom-overlay'],
+      domOverlay: { root: document.body }
+    });
+    arButton.id = 'ar-button';
+    document.body.appendChild(arButton);
+
+    // Створення групи для Сатурна та його кілець
+    const group = new THREE.Group();
+
+    // Сатурн
+    const saturnGeometry = new THREE.SphereGeometry(0.6, 32, 32);
+    const saturnMaterial = new THREE.MeshStandardMaterial({
+      map: new THREE.TextureLoader().load('week05/2k_saturn.jpg')
+    });
+    const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
+    saturn.castShadow = true;
+    group.add(saturn);
+
+    // Кільця
+    const ringGeometry = new THREE.RingGeometry(0.745, 1.37, 64);
+    const ringMaterial = new THREE.MeshStandardMaterial({
+      map: new THREE.TextureLoader().load('week05/2k_saturn_ring_alpha.png'),
+      side: THREE.DoubleSide,
+      transparent: true
+    });
+    const rings = new THREE.Mesh(ringGeometry, ringMaterial);
+    rings.rotation.x = Math.PI / 2;
+    rings.castShadow = true;
+    group.add(rings);
+
+    // Нахил осі Сатурна (27°)
+    group.rotation.x = THREE.MathUtils.degToRad(27);
+
+    // Додавання площини для прийому тіней
+    const planeGeometry = new THREE.PlaneGeometry(10, 10);
+    const planeMaterial = new THREE.ShadowMaterial({ opacity: 0.5 });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.rotation.x = -Math.PI / 2;
+    plane.position.y = -1;
+    plane.receiveShadow = true;
+    scene.add(plane);
+
+    // Джерело світла
+    const pointLight = new THREE.PointLight(0xffffff, 1.5, 10);
+    pointLight.position.set(5, 5, 5);
+    pointLight.castShadow = true;
+    pointLight.shadow.mapSize.width = 1024;
+    pointLight.shadow.mapSize.height = 1024;
+    scene.add(pointLight);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambientLight);
+
+    let isPlaced = false;
+    let hitTestSource = null;
+    let hitTestSourceRequested = false;
+
+    renderer.xr.addEventListener('sessionstart', async () => {
+      const session = renderer.xr.getSession();
+      const viewerReferenceSpace = await session.requestReferenceSpace('viewer');
+      hitTestSourceRequested = true;
+      session.requestHitTestSource({ space: viewerReferenceSpace }).then(source => {
+        hitTestSource = source;
+      });
+    });
+
+    renderer.xr.addEventListener('sessionend', () => {
+      hitTestSourceRequested = false;
+      hitTestSource = null;
+      isPlaced = false;
+    });
+
+    const animate = () => {
+      renderer.setAnimationLoop(() => {
+        if (!isPlaced && hitTestSource) {
+          const frame = renderer.xr.getFrame();
+          const hitTestResults = frame.getHitTestResults(hitTestSource);
+          if (hitTestResults.length > 0) {
+            const hit = hitTestResults[0];
+            const pose = hit.getPose(renderer.xr.getReferenceSpace());
+            if (pose) {
+              group.position.setFromMatrixPosition(new THREE.Matrix4().fromArray(pose.transform.matrix));
+              scene.add(group);
+              isPlaced = true;
+            }
+          }
+       
