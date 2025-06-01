@@ -1,12 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Saturn AR Scene with Three.js and WebXR</title>
+  <title>Saturn WebXR Scene</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { margin: 0; }
-    canvas { display: block; }
+    body { margin: 0; overflow: hidden; }
+    #ar-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+    #ar-button {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+    }
   </style>
   <script type="importmap">
     {
@@ -18,94 +30,103 @@
   </script>
 </head>
 <body>
-  <img id="saturn-marker" src="../assets/pattern-Rubens-Saturno-detalle.png" style="visibility: hidden;" />
+  <div id="ar-container"></div>
   <script type="module">
     import * as THREE from 'three';
-    import { ARButton } from '../three/addons/webxr/ARButton.js';
+    import { ARButton } from 'three/addons/webxr/ARButton.js';
 
-    // Ініціалізація рендерера
+    // Initialize renderer with WebXR support
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
     renderer.xr.enabled = true;
+    document.getElementById('ar-container').appendChild(renderer.domElement);
 
-    // Додавання кнопки для запуску AR
-    document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['image-tracking'] }));
+    // Add AR button
+    document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
 
-    // Ініціалізація сцени та камери
+    // Scene and camera
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.matrixAutoUpdate = false; // WebXR керує камерою
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
-    // Створення групи для Сатурна та його кілець
+    // Texture Loader
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.setCrossOrigin('anonymous');
+
+    // Group for Saturn and its rings
     const group = new THREE.Group();
 
-    // Сатурн
+    // Saturn
     const saturnGeometry = new THREE.SphereGeometry(0.6, 32, 32);
-    const saturnMaterial = new THREE.MeshStandardMaterial({
-      map: new THREE.TextureLoader().load('../week05/2k_saturn.jpg')
-    });
-    const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
-    group.add(saturn);
+    let saturn;
+    textureLoader.load(
+      '../week05/2k_saturn.jpg',
+      (texture) => {
+        texture.colorSpace = 'srgb';
+        const saturnMaterial = new THREE.MeshStandardMaterial({ map: texture });
+        saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
+        group.add(saturn);
+        console.log('Saturn texture loaded successfully');
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading Saturn texture:', error);
+      }
+    );
 
-    // Кільця
+    // Rings
     const ringGeometry = new THREE.RingGeometry(0.745, 1.37, 64);
-    const ringMaterial = new THREE.MeshStandardMaterial({
-      map: new THREE.TextureLoader().load('../week05/2k_saturn_ring_alpha.png'),
-      side: THREE.DoubleSide,
-      transparent: true
-    });
-    const rings = new THREE.Mesh(ringGeometry, ringMaterial);
-    rings.rotation.x = Math.PI / 2;
-    group.add(rings);
+    textureLoader.load(
+      '../week05/2k_saturn_ring_alpha.png',
+      (texture) => {
+        texture.colorSpace = 'srgb';
+        const ringMaterial = new THREE.MeshStandardMaterial({
+          map: texture,
+          side: THREE.DoubleSide,
+          transparent: true
+        });
+        const rings = new THREE.Mesh(ringGeometry, ringMaterial);
+        rings.rotation.x = Math.PI / 2;
+        group.add(rings);
+        console.log('Rings texture loaded successfully');
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading Rings texture:', error);
+      }
+    );
 
-    // Нахил осі Сатурна (27°)
+    // Tilt Saturn's axis (27°)
     group.rotation.x = THREE.MathUtils.degToRad(27);
-
-    // Додавання групи до сцени
+    group.position.set(0, 0, -1.5); // Position in front of camera
     scene.add(group);
 
-    // Джерело світла
+    // Lighting
     const pointLight = new THREE.PointLight(0xffffff, 1.5, 10);
     pointLight.position.set(5, 0, 0);
     scene.add(pointLight);
 
-    // Анімація
-    renderer.setAnimationLoop((time, frame) => {
-      if (frame) {
-        // Ми в режимі XR
-        const referenceSpace = renderer.xr.getReferenceSpace();
-        const session = renderer.xr.getSession();
-        if (session && session.getImageTrackingResults) {
-          const results = session.getImageTrackingResults();
-          if (results && results.length > 0) {
-            const result = results[0]; // Припускаємо один маркер
-            if (result.trackingState === 'tracked') {
-              const pose = frame.getPose(result.imageSpace, referenceSpace);
-              if (pose) {
-                group.matrix.fromArray(pose.transform.matrix);
-                group.matrix.decompose(group.position, group.quaternion, group.scale);
-                group.visible = true;
-              } else {
-                group.visible = false;
-              }
-            } else {
-              group.visible = false;
-            }
-          } else {
-            group.visible = false;
-          }
-        }
-      } else {
-        // Не в режимі XR
-        group.visible = false;
-      }
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
 
-      // Додаткова анімація обертання Сатурна
-      group.rotation.y += 0.01;
-
-      // Рендеринг сцени
+    // Animation
+    const clock = new THREE.Clock();
+    const animate = () => {
+      const delta = clock.getDelta();
+      if (group) group.rotation.y += (2 * Math.PI / (10 * 60)) * delta; // Saturn rotation
       renderer.render(scene, camera);
+    };
+
+    // WebXR render loop
+    renderer.setAnimationLoop(() => {
+      animate();
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
     });
   </script>
 </body>
