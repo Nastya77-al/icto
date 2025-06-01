@@ -35,17 +35,14 @@
     import * as THREE from 'three';
     import { ARButton } from 'three/addons/webxr/ARButton.js';
 
-    // Initialize renderer with WebXR support
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.xr.enabled = true;
     document.getElementById('ar-container').appendChild(renderer.domElement);
 
-    // Add AR button
     document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
 
-    // Scene and camera
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
@@ -56,8 +53,7 @@
     // Group for Saturn and its rings
     const group = new THREE.Group();
 
-    // Saturn
-    const saturnGeometry = new THREE.SphereGeometry(0.6, 32, 32);
+    const saturnGeometry = new THREE.SphereGeometry(0.3, 32, 32);
     let saturn;
     textureLoader.load(
       '../week05/2k_saturn.jpg',
@@ -74,8 +70,7 @@
       }
     );
 
-    // Rings
-    const ringGeometry = new THREE.RingGeometry(0.745, 1.37, 64);
+    const ringGeometry = new THREE.RingGeometry(0.3725, 0.685, 64);
     textureLoader.load(
       '../week05/2k_saturn_ring_alpha.png',
       (texture) => {
@@ -96,12 +91,10 @@
       }
     );
 
-    // Tilt Saturn's axis (27°)
     group.rotation.x = THREE.MathUtils.degToRad(27);
-    group.position.set(0, 0, -1.5); // Position in front of camera
+    group.position.set(0, 0, -1.5); 
     scene.add(group);
 
-    // Lighting
     const pointLight = new THREE.PointLight(0xffffff, 1.5, 10);
     pointLight.position.set(5, 0, 0);
     scene.add(pointLight);
@@ -109,20 +102,17 @@
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
-    // Animation
     const clock = new THREE.Clock();
     const animate = () => {
       const delta = clock.getDelta();
-      if (group) group.rotation.y += (2 * Math.PI / (10 * 60)) * delta; // Saturn rotation
+      if (group) group.rotation.y += (2 * Math.PI / (10 * 60)) * delta; 
       renderer.render(scene, camera);
     };
 
-    // WebXR render loop
     renderer.setAnimationLoop(() => {
       animate();
     });
 
-    // Handle window resize
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
