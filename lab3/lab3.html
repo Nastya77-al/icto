@@ -46,14 +46,12 @@
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
-    // Texture Loader
     const textureLoader = new THREE.TextureLoader();
     textureLoader.setCrossOrigin('anonymous');
 
-    // Group for Saturn and its rings
     const group = new THREE.Group();
 
-    const saturnGeometry = new THREE.SphereGeometry(0.3, 32, 32);
+    const saturnGeometry = new THREE.SphereGeometry(0.15, 32, 32);
     let saturn;
     textureLoader.load(
       '../week05/2k_saturn.jpg',
@@ -70,7 +68,7 @@
       }
     );
 
-    const ringGeometry = new THREE.RingGeometry(0.3725, 0.685, 64);
+    const ringGeometry = new THREE.RingGeometry(0.18625, 0.3425, 64);
     textureLoader.load(
       '../week05/2k_saturn_ring_alpha.png',
       (texture) => {
@@ -105,7 +103,7 @@
     const clock = new THREE.Clock();
     const animate = () => {
       const delta = clock.getDelta();
-      if (group) group.rotation.y += (2 * Math.PI / (10 * 60)) * delta; 
+      if (group) group.rotation.y += (2 * Math.PI / (10 * 60)) * delta; // Saturn rotation
       renderer.render(scene, camera);
     };
 
