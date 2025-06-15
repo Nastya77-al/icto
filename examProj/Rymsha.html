@@ -4,11 +4,13 @@
   <meta charset="utf-8">
   <title>VR Polyhedra Explorer</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <!-- cкрипт який відповідає за обертання фігури (перевіряє обертання по кліку) -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const shapes = ['tetra', 'cube', 'octa', 'icosa', 'dodeca'];
       shapes.forEach(shapeId => {
         const shape = document.getElementById(shapeId);
+        //Якщо не обертається, то почне обертатися
         if (shape) {
           let isRotating = false;
           let rotation = 0;
@@ -24,6 +26,7 @@
                 }
               }
               rotate();
+            //інакше перестане
             } else {
               isRotating = false;
             }
@@ -34,6 +37,7 @@
   </script>
 </head>
 <body>
+  <!-- колір фону сцени в HEX-коді -->
   <a-scene background="color: #000042">
     <!-- камера та курсор -->
     <a-camera position="0 1.6 5">
